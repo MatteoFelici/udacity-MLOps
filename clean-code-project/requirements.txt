@@ -1,0 +1,7 @@
+numpy<=1.20.0
+scikit-learn==0.22
+shap
+pylint
+autopep8
+matplotlib
+seaborn
