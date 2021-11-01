@@ -1,5 +1,8 @@
-# library doc string
+"""
+Source code for complete analysis and training of the Churn model
+"""
 
+import os
 import argparse
 import logging
 import joblib
@@ -13,8 +16,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, plot_roc_curve
 
 from constants import CAT_COLUMNS, QUANT_COLUMNS, ATTRITION_COLUMN, \
-    TARGET_COLUMN, FIGSIZE, PARAM_GRID
-
+    FIGSIZE, PARAM_GRID
 
 # Logger
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s',
@@ -31,19 +33,19 @@ class ChurnModel:
     - Develop models
     - Output performances
     """
+
     def __init__(self,
-                 category_columns: list = CAT_COLUMNS,
-                 numerical_columns: list = QUANT_COLUMNS,
-                 attrition_flag: str = ATTRITION_COLUMN,
-                 response: str = TARGET_COLUMN):
+                 category_columns: set = CAT_COLUMNS,
+                 numerical_columns: set = QUANT_COLUMNS,
+                 attrition_flag: str = ATTRITION_COLUMN):
+
         self.category_columns = category_columns
         self.numerical_columns = numerical_columns
         self.attrition_flag = attrition_flag
-        self.response = response
         self.encodings = {}
         self.rfc = RandomForestClassifier(random_state=42)
         self.lrc = LogisticRegression(solver='liblinear')
-        self.df = None
+        self.input_data = None
 
     def import_data(self, pth: str):
         """
@@ -58,62 +60,78 @@ class ChurnModel:
         -------
         df: pd.DataFrame
         """
+        # Check if pth is a string
+        try:
+            assert isinstance(pth, str)
+        except AssertionError:
+            logger.error(f'{pth} should be a string')
+        # Check if pth file exists
+        try:
+            assert os.path.isfile(pth)
+        except AssertionError:
+            logger.error(f'File {pth} does not exist')
         logger.info(f'Read data from {pth}')
-        self.df = pd.read_csv(pth)
-        logger.info(f'Input data has {self.df.shape[0]} records')
+        self.input_data = pd.read_csv(pth)
+        logger.info(f'Input data has {self.input_data.shape[0]} records')
 
     def perform_eda(self,
                     figsize: tuple = FIGSIZE,
                     kde: bool = False):
-        f"""
+        """
         Perform eda on df and save figures to images folder
 
         Parameters
         ----------
-        figsize: tuple, default {FIGSIZE}
+        figsize: tuple
             Figsize for all plots
         kde: bool, default False
             If True, apply kde to all numerical variables' plots
         """
 
+        try:
+            assert len(figsize) == 2
+        except AssertionError:
+            logger.error(f'{figsize} should be a tuple of 2 elements')
+        try:
+            assert isinstance(kde, bool)
+        except AssertionError:
+            logger.error(f'{kde} should be a boolean')
+
         # Create comprehensive list with all features
         all_features = self.category_columns + self.numerical_columns + \
-                       [self.response, 'correlations']
+                       [self.attrition_flag, 'correlations']
 
         logging.info(f'Use {figsize} as figsize for all plots')
         logging.info(f"Use kde={kde} for all numerical variables' plots")
         # Cycle through the features and create the right plot type
         for feat in all_features:
-            if feat not in self.df.columns:
-                logging.warning(f'Feature {feat} not present in input data')
-                continue
             plt.figure(figsize=figsize)
-            if feat == self.response:
+            if feat == self.attrition_flag:
                 logging.info(f'Histogram on target variable {feat}')
-                self.df[feat].hist()
+                self.input_data[feat].hist()
             elif feat == 'correlations':
-                logging.info(f'Heatmap with correlation coefficients')
-                sns.heatmap(self.df[feat].corr(), annot=False,
-                            cmap='Dark2_r', linewidths=2)
+                logging.info('Heatmap with correlation coefficients')
+                sns.heatmap(self.input_data[self.numerical_columns].corr(),
+                            annot=False, cmap='Dark2_r', linewidths=2)
             elif feat in self.category_columns:
                 logging.info(f'Barchart on categorical variable {feat} with '
                              'relative frequency')
-                self.df[feat].value_counts('normalize').plot(kind='bar')
+                self.input_data[feat].value_counts('normalize').plot(kind='bar')
             else:
                 logging.info(f'Histogram on numerical variable {feat}')
-                sns.histplot(self.df[feat], kde=kde)
+                sns.histplot(self.input_data[feat], kde=kde)
             logging.info(f'Save plot to images/{feat}.png')
             plt.savefig(f'images/{feat}.png')
 
-    def target_encoder_fit(self, x, y):
+    def target_encoder_fit(self, input_data, label_data):
         """
         Fit target encoder based on train data
 
         Parameters
         ----------
-        x: pd.DataFrame
+        input_data: pd.DataFrame
             Input data used to calculate encodings
-        y: pd.Series
+        label_data: pd.Series
             Target data
         """
 
@@ -124,16 +142,16 @@ class ChurnModel:
                          f'{len_category_lst}')
             # Calculate encodings on input data
             self.encodings[feature] = pd.concat(
-                (x[feature], y), 1
-            ).groupby(feature)[self.response].mean()
+                (input_data[feature], label_data), 1
+            ).groupby(feature)['Churn'].mean()
 
-    def target_encoder_apply(self, x):
+    def target_encoder_apply(self, input_data):
         """
         Apply fitted target encorder to input data
 
         Parameters
         ----------
-        x: pd.DataFrame
+        input_data: pd.DataFrame
             Input data where to apply encodings
 
         Returns
@@ -142,7 +160,7 @@ class ChurnModel:
             Dataframe with encoded columns
         """
 
-        x_encoded = x.copy()
+        x_encoded = input_data.copy()
         len_category_lst = len(self.encodings)
         if len_category_lst == 0:
             logging.error('Target encoding is still not fitted')
@@ -153,9 +171,9 @@ class ChurnModel:
                          f'{len_category_lst}')
             # Apply encodings on input data
             x_encoded[feature] = pd.merge(
-                x[feature], self.encodings[feature],
+                input_data[feature], self.encodings[feature],
                 left_on=feature, right_index=True
-            )[self.response]
+            )['Churn']
 
         return x_encoded
 
@@ -184,27 +202,30 @@ class ChurnModel:
             y testing data
         """
 
-        if self.df is None:
+        if self.input_data is None:
             logging.error('Input data is missing')
             raise AttributeError('Input data is missing')
         # Encode response variable
         logging.info(f'Encode {self.attrition_flag} feature into binary '
-                     f'feature {self.response}')
-        self.df[self.response] = 1
-        self.df.loc[self.df[self.attrition_flag] == 'Existing Customer',
-                    self.response] = 0
+                     'feature Churn')
+        self.input_data['Churn'] = 1
+        self.input_data.loc[
+            self.input_data[self.attrition_flag] == 'Existing Customer',
+            'Churn'
+        ] = 0
 
         # Select only relevant features
-        self.df = self.df[self.category_columns + self.numerical_columns +
-                          [self.response]]
+        self.input_data = self.input_data[
+            self.category_columns + self.numerical_columns + ['Churn']
+        ]
 
         # Split train-test
         logging.info(f'Split input data into train/test ({test_size} test '
-                     f'size)')
+                     'size)')
         x_train, x_test, y_train, y_test = train_test_split(
-            self.df.drop(self.response, 1), self.df[self.response],
+            self.input_data.drop('Churn', 1), self.input_data['Churn'],
             test_size=test_size, random_state=42,
-            stratify=self.df[self.response]
+            stratify=self.input_data['Churn']
         )
 
         logging.info('Encode categorical data')
@@ -215,9 +236,9 @@ class ChurnModel:
         return x_train, x_test, y_train, y_test
 
     @staticmethod
-    def _predict_and_store(estimator, x, pth):
+    def _predict_and_store(estimator, input_data, pth):
 
-        preds = pd.Series(estimator.predict(x))
+        preds = pd.Series(estimator.predict(input_data))
         preds.to_csv(pth, index=False)
         return preds
 
@@ -227,7 +248,7 @@ class ChurnModel:
         train, store model results: images + scores, and store models
         """
 
-        if self.df is None:
+        if self.input_data is None:
             logging.error('Input data is missing')
             raise AttributeError('Input data is missing')
 
@@ -235,7 +256,8 @@ class ChurnModel:
 
         cv_rfc = GridSearchCV(estimator=self.rfc,
                               param_grid=param_grid,
-                              cv=5)
+                              cv=5,
+                              verbose=3)
         cv_rfc.fit(x_train, y_train)
 
         self.lrc.fit(x_train, y_train)
@@ -252,16 +274,16 @@ class ChurnModel:
         logging.info('Calculate predictions for random forest')
         y_train_preds_rf = self._predict_and_store(self.rfc,
                                                    x_train,
-                                                   'rfc_preds_train.csv')
+                                                   'data/rfc_preds_train.csv')
         y_test_preds_rf = self._predict_and_store(self.rfc,
                                                   x_test,
-                                                  'rfc_preds_test.csv')
+                                                  'data/rfc_preds_test.csv')
 
         logging.info('Calculate predictions for logistic regression')
         y_train_preds_lr = self._predict_and_store(self.lrc, x_train,
-                                                   'lrc_preds_train.csv')
+                                                   'data/lrc_preds_train.csv')
         y_test_preds_lr = self._predict_and_store(self.lrc, x_test,
-                                                  'lrc_preds_test.csv')
+                                                  'data/lrc_preds_test.csv')
 
         self.classification_report_image(y_train, x_test, y_test,
                                          y_train_preds_lr, y_train_preds_rf,
@@ -280,7 +302,7 @@ class ChurnModel:
                                     y_test_preds_lr,
                                     y_test_preds_rf,
                                     figsize: tuple = FIGSIZE):
-        f"""
+        """
         Produce classification report for training and testing results, and
         stores report as image in images folder
 
@@ -300,7 +322,7 @@ class ChurnModel:
             Test predictions from logistic regression
         y_test_preds_rf: pd.Series
             Test predictions from random forest
-        figsize: tuple, default {FIGSIZE}
+        figsize: tuple
             Figsize for all plots
         """
         logging.info('Calculate random forest results')
@@ -320,44 +342,43 @@ class ChurnModel:
         # Create ROC Curve image
         logging.info('Plot ROC Curve for both models')
         plt.figure(figsize=figsize)
-        ax = plt.gca()
-        plot_roc_curve(self.lrc, x_test, y_test, ax=ax)
-        plot_roc_curve(self.rfc, x_test, y_test, ax=ax, alpha=0.8)
+        figure_ax = plt.gca()
+        plot_roc_curve(self.lrc, x_test, y_test, ax=figure_ax)
+        plot_roc_curve(self.rfc, x_test, y_test, ax=figure_ax, alpha=0.8)
         logging.info('Save plot to images/ROC.png')
         plt.savefig('images/ROC.png')
 
     @staticmethod
     def feature_importance_plot(estimator,
-                                x: pd.DataFrame,
+                                input_data: pd.DataFrame,
                                 output_pth: str,
                                 figsize: tuple = FIGSIZE):
-        f"""
+        """
         creates and stores the feature importances in pth
 
         Parameters
         ----------
             estimator: scikit-learn estimator
                 Model object containing feature_importances_
-            x: pd.DataFrame
+            input_data: pd.DataFrame
                 Input data
             output_pth: str
                 Path where to store the figure
-        figsize: tuple, default {FIGSIZE}
+        figsize: tuple
             Figsize for all plots
         """
 
         plt.figure(figsize=figsize)
 
         explainer = shap.TreeExplainer(estimator)
-        shap_values = explainer.shap_values(x)
-        shap.summary_plot(shap_values, x, plot_type="bar", show=False)
+        shap_values = explainer.shap_values(input_data)
+        shap.summary_plot(shap_values, input_data, plot_type="bar", show=False)
 
         logging.info(f'Save feature importances plot to {output_pth}')
         plt.savefig(output_pth)
 
 
 if __name__ == '__main__':
-
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--input-path',
                         help='Path to input data',
@@ -365,6 +386,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     model = ChurnModel()
-    model.perform_eda()
     model.import_data(args.input_path)
+    model.perform_eda()
     model.train_models()
