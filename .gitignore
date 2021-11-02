@@ -96,3 +96,7 @@ catboost_info/
 
 # CSV data
 *.csv
+
+# Pickle and joblib files
+*.pkl
+*.joblib

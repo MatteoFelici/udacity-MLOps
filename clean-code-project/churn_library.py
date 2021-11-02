@@ -20,7 +20,11 @@ from constants import CAT_COLUMNS, QUANT_COLUMNS, ATTRITION_COLUMN, \
 
 # Logger
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s',
-                    level=logging.INFO)
+                    level=logging.INFO,
+                    handlers=[
+                        logging.FileHandler('churn_log.log'),
+                        logging.StreamHandler()
+                    ])
 logger = logging.getLogger()
 
 
