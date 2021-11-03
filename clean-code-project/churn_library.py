@@ -39,8 +39,8 @@ class ChurnModel:
     """
 
     def __init__(self,
-                 category_columns: set = CAT_COLUMNS,
-                 numerical_columns: set = QUANT_COLUMNS,
+                 category_columns: list = CAT_COLUMNS,
+                 numerical_columns: list = QUANT_COLUMNS,
                  attrition_flag: str = ATTRITION_COLUMN):
 
         self.category_columns = category_columns
@@ -102,8 +102,8 @@ class ChurnModel:
             logger.error(f'{kde} should be a boolean')
 
         # Create comprehensive list with all features
-        all_features = self.category_columns | self.numerical_columns | \
-                       {self.attrition_flag, 'correlations'}
+        all_features = self.category_columns + self.numerical_columns + \
+                       [self.attrition_flag, 'correlations']
 
         logging.info(f'Use {figsize} as figsize for all plots')
         logging.info(f"Use kde={kde} for all numerical variables' plots")
@@ -220,7 +220,7 @@ class ChurnModel:
 
         # Select only relevant features
         self.input_data = self.input_data[
-            self.category_columns | self.numerical_columns | {'Churn'}
+            self.category_columns + self.numerical_columns + ['Churn']
         ]
 
         # Split train-test

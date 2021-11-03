@@ -36,8 +36,8 @@ def test_eda():
     model = ChurnModel()
     model.import_data('./data/bank_data.csv')
     model.perform_eda()
-    for feat in model.category_columns | model.numerical_columns | \
-                {model.attrition_flag, 'correlations'}:
+    for feat in model.category_columns + model.numerical_columns + \
+                [model.attrition_flag, 'correlations']:
         assert os.path.isfile(f'images/{feat}.png')
 
 

@@ -1,12 +1,12 @@
-CAT_COLUMNS = {
+CAT_COLUMNS = [
     'Gender',
     'Education_Level',
     'Marital_Status',
     'Income_Category',
     'Card_Category'
-}
+]
 
-QUANT_COLUMNS = {
+QUANT_COLUMNS = [
     'Customer_Age',
     'Dependent_count',
     'Months_on_book',
@@ -21,7 +21,7 @@ QUANT_COLUMNS = {
     'Total_Trans_Ct',
     'Total_Ct_Chng_Q4_Q1',
     'Avg_Utilization_Ratio'
-}
+]
 
 ATTRITION_COLUMN = 'Attrition_Flag'
 
