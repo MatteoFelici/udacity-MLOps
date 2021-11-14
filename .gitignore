@@ -100,3 +100,6 @@ catboost_info/
 # Pickle and joblib files
 *.pkl
 *.joblib
+
+#Weights & Biases files
+wandb/
