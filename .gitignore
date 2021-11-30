@@ -103,6 +103,7 @@ catboost_info/
 
 #Weights & Biases files
 wandb/
+artifacts/
 
 #MLFlow files
 mlruns/
