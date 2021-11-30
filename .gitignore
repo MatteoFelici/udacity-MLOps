@@ -106,3 +106,6 @@ wandb/
 
 #MLFlow files
 mlruns/
+
+#Hydra files
+outputs/
