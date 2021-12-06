@@ -1,0 +1,24 @@
+name: exercise-5
+conda_env: conda.yaml
+
+entry_points:
+  main:
+    parameters:
+      input_artifact:
+        description: input artifact name on W&B
+        type: str
+      artifact_name:
+        description: output artifact name
+        type: str
+      artifact_type:
+        description: output artifact type
+        type: str
+      artifact_description:
+        description: output artifact description
+        type: str
+    command: >-
+      python run.py \
+        --input_artifact {input_artifact} \
+        --artifact_name {artifact_name} \
+        --artifact_type {artifact_type} \
+        --artifact_description {artifact_description}
