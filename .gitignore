@@ -76,7 +76,7 @@ target/
 .ipynb_checkpoints/
 
 # exclude data from source control by default
-*data/
+*/data/
 
 # Mac OS-specific storage files
 .DS_Store
@@ -100,3 +100,13 @@ catboost_info/
 # Pickle and joblib files
 *.pkl
 *.joblib
+
+#Weights & Biases files
+wandb/
+artifacts/
+
+#MLFlow files
+mlruns/
+
+#Hydra files
+outputs/

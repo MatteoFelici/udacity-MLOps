@@ -1,0 +1,10 @@
+name: MLOps-ex2
+channels:
+  - conda-forge
+  - default
+dependencies:
+  - requests=2.24.0
+  - pip=20.3.3
+  - python=3.7
+  - pip:
+    - wandb==0.10.21
