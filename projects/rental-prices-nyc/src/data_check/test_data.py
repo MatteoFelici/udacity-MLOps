@@ -3,7 +3,7 @@ import numpy as np
 import scipy.stats
 
 
-def test_column_names(data):
+def test_column_names(data: pd.DataFrame):
 
     expected_colums = [
         "id",
@@ -30,7 +30,7 @@ def test_column_names(data):
     assert list(expected_colums) == list(these_columns)
 
 
-def test_neighborhood_names(data):
+def test_neighborhood_names(data: pd.DataFrame):
 
     known_names = ["Bronx", "Brooklyn", "Manhattan", "Queens", "Staten Island"]
 
@@ -49,10 +49,12 @@ def test_proper_boundaries(data: pd.DataFrame):
     assert np.sum(~idx) == 0
 
 
-def test_similar_neigh_distrib(data: pd.DataFrame, ref_data: pd.DataFrame, kl_threshold: float):
+def test_similar_neigh_distrib(data: pd.DataFrame,
+                               ref_data: pd.DataFrame,
+                               kl_threshold: float):
     """
-    Apply a threshold on the KL divergence to detect if the distribution of the new data is
-    significantly different than that of the reference dataset
+    Apply a threshold on the KL divergence to detect if the distribution of the
+    new data is significantly different than that of the reference dataset
     """
     dist1 = data['neighbourhood_group'].value_counts().sort_index()
     dist2 = ref_data['neighbourhood_group'].value_counts().sort_index()
@@ -60,6 +62,13 @@ def test_similar_neigh_distrib(data: pd.DataFrame, ref_data: pd.DataFrame, kl_th
     assert scipy.stats.entropy(dist1, dist2, base=2) < kl_threshold
 
 
-########################################################
-# Implement here test_row_count and test_price_range   #
-########################################################
+def test_row_count(data: pd.DataFrame):
+    """Check the total number of records"""
+    assert 15000 < data.shape[0] < 1000000
+
+
+def test_price_range(data: pd.DataFrame,
+                     min_price: float,
+                     max_price: float):
+    """Test price thresholds"""
+    assert data['price'].between(min_price, max_price).all()
