@@ -33,6 +33,11 @@ def go(args):
                 f'and {args.max_price}')
     logger.info(f'{df.shape[0]} records still available')
 
+    # Filter on proper geo location
+    idx = df['longitude'].between(-74.25, -73.50) & df['latitude'].between(40.5,
+                                                                           41.2)
+    df = df[idx].copy()
+
     # Output data
     artifact = wandb.Artifact(
         args.output_artifact,
