@@ -107,6 +107,7 @@ artifacts/
 
 #MLFlow files
 mlruns/
+multirun/
 
 #Hydra files
 outputs/
