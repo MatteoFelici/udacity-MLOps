@@ -21,7 +21,7 @@ def test_column_presence_and_type(data):
         "tempo": pd.api.types.is_float_dtype,
         "duration_ms": pd.api.types.is_integer_dtype,  # This is integer, not float as one might expect
         "text_feature": pd.api.types.is_string_dtype,
-        "genre": pd.api.types.is_string_dtype
+        "genre": pd.api.types.is_string_dtype,
     }
 
     # Check column presence
@@ -29,7 +29,9 @@ def test_column_presence_and_type(data):
 
     for col_name, format_verification_funct in required_columns.items():
 
-        assert format_verification_funct(data[col_name]), f"Column {col_name} failed test {format_verification_funct}"
+        assert format_verification_funct(
+            data[col_name]
+        ), f"Column {col_name} failed test {format_verification_funct}"
 
 
 def test_class_names(data):
@@ -101,13 +103,13 @@ def test_kolmogorov_smirnov(data, ks_alpha):
         "liveness",
         "valence",
         "tempo",
-        "duration_ms"
+        "duration_ms",
     ]
 
     # Bonferroni correction for multiple hypothesis testing
     # (see my blog post on this topic to see where this comes from:
     # https://towardsdatascience.com/precision-and-recall-trade-off-and-multiple-hypothesis-testing-family-wise-error-rate-vs-false-71a85057ca2b)
-    alpha_prime = 1 - (1 - ks_alpha)**(1 / len(columns))
+    alpha_prime = 1 - (1 - ks_alpha) ** (1 / len(columns))
 
     for col in columns:
 

@@ -54,11 +54,7 @@ def go(args):
     )
     fig_cm.tight_layout()
 
-    run.log(
-        {
-            "confusion_matrix": wandb.Image(fig_cm)
-        }
-    )
+    run.log({"confusion_matrix": wandb.Image(fig_cm)})
 
 
 if __name__ == "__main__":

@@ -193,7 +193,9 @@ def get_training_inference_pipeline(args):
     )
 
     # Get a list of the columns we used
-    used_columns = list(itertools.chain.from_iterable([x[2] for x in preprocessor.transformers]))
+    used_columns = list(
+        itertools.chain.from_iterable([x[2] for x in preprocessor.transformers])
+    )
 
     # Append classifier to preprocessing pipeline.
     # Now we have a full prediction pipeline.
@@ -239,7 +241,7 @@ if __name__ == "__main__":
         type=int,
         help="Seed for the random number generator.",
         required=False,
-        default=42
+        default=42,
     )
 
     parser.add_argument(
@@ -247,7 +249,7 @@ if __name__ == "__main__":
         type=float,
         help="Size for the validation set as a fraction of the training set",
         required=False,
-        default=0.3
+        default=0.3,
     )
 
     parser.add_argument(

@@ -30,7 +30,9 @@ def go(args):
 
     pipe = mlflow.sklearn.load_model(model_export_path)
 
-    used_columns = list(itertools.chain.from_iterable([x[2] for x in pipe['preprocessor'].transformers]))
+    used_columns = list(
+        itertools.chain.from_iterable([x[2] for x in pipe["preprocessor"].transformers])
+    )
     pred_proba = pipe.predict_proba(X_test[used_columns])
 
     logger.info("Scoring")
@@ -51,11 +53,7 @@ def go(args):
     )
     fig_cm.tight_layout()
 
-    run.log(
-        {
-            "confusion_matrix": wandb.Image(fig_cm)
-        }
-    )
+    run.log({"confusion_matrix": wandb.Image(fig_cm)})
 
 
 if __name__ == "__main__":

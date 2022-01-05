@@ -34,7 +34,7 @@ def data(request):
     return sample1, sample2
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def ks_alpha(request):
     ks_alpha = request.config.option.ks_alpha
 

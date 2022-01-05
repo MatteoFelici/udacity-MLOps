@@ -9,7 +9,7 @@ run = wandb.init(project="exercise_9", job_type="data_tests")
 def pytest_addoption(parser):
     parser.addoption("--reference_artifact", action="store")
     parser.addoption("--sample_artifact", action="store")
-    parser.addoption('--ks_alpha', action='store')
+    parser.addoption("--ks_alpha", action="store")
 
 
 @pytest.fixture(scope="session")
@@ -34,7 +34,7 @@ def data(request):
     return sample1, sample2
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def ks_alpha(request):
 
     return float(request.config.option.ks_alpha)

@@ -5,7 +5,7 @@ from omegaconf import DictConfig, OmegaConf
 
 
 # This automatically reads in the configuration
-@hydra.main(config_name='config')
+@hydra.main(config_name="config")
 def go(config: DictConfig):
 
     # Setup the wandb experiment. All runs will be grouped under this name
@@ -32,7 +32,7 @@ def go(config: DictConfig):
                 "file_url": config["data"]["file_url"],
                 "artifact_name": "raw_data.parquet",
                 "artifact_type": "raw_data",
-                "artifact_description": "Data as downloaded"
+                "artifact_description": "Data as downloaded",
             },
         )
 
@@ -42,11 +42,12 @@ def go(config: DictConfig):
             os.path.join(root_path, "preprocess"),
             "main",
             parameters={
-                "input_artifact": os.path.join(config['main']['project_name'],
-                                               'raw_data.parquet:latest'),
+                "input_artifact": os.path.join(
+                    config["main"]["project_name"], "raw_data.parquet:latest"
+                ),
                 "artifact_name": "preprocessed_data.csv",
                 "artifact_type": "preprocessed_data",
-                "artifact_description": "Data after preprocessing"
+                "artifact_description": "Data after preprocessing",
             },
         )
 
@@ -56,9 +57,9 @@ def go(config: DictConfig):
             os.path.join(root_path, "check_data"),
             "main",
             parameters={
-                "reference_artifact": config['data']['reference_dataset'],
-                "sample_artifact": 'preprocessed_data.csv:latest',
-                "ks_alpha": config['data']['ks_alpha']
+                "reference_artifact": config["data"]["reference_dataset"],
+                "sample_artifact": "preprocessed_data.csv:latest",
+                "ks_alpha": config["data"]["ks_alpha"],
             },
         )
 
@@ -68,12 +69,12 @@ def go(config: DictConfig):
             os.path.join(root_path, "segregate"),
             "main",
             parameters={
-                "input_artifact": 'preprocessed_data.csv:latest',
+                "input_artifact": "preprocessed_data.csv:latest",
                 "artifact_root": "data",
                 "artifact_type": "segregated_data",
-                "test_size": config['data']['test_size'],
-                'random_state': config['main']['random_seed'],
-                'stratify': config['data']['stratify']
+                "test_size": config["data"]["test_size"],
+                "random_state": config["main"]["random_seed"],
+                "stratify": config["data"]["stratify"],
             },
         )
 
@@ -89,13 +90,12 @@ def go(config: DictConfig):
             os.path.join(root_path, "random_forest"),
             "main",
             parameters={
-                "train_data": 'data_train.csv:latest',
+                "train_data": "data_train.csv:latest",
                 "model_config": model_config,
-                "export_artifact":
-                    config['random_forest_pipeline']['export_artifact'],
-                'random_seed': config['main']['random_seed'],
-                'val_size': config['data']['val_size'],
-                'stratify': config['data']['stratify']
+                "export_artifact": config["random_forest_pipeline"]["export_artifact"],
+                "random_seed": config["main"]["random_seed"],
+                "val_size": config["data"]["val_size"],
+                "stratify": config["data"]["stratify"],
             },
         )
 
@@ -105,10 +105,9 @@ def go(config: DictConfig):
             os.path.join(root_path, "evaluate"),
             "main",
             parameters={
-                "model_export":
-                    f'{config["random_forest_pipeline"]["export_artifact"]}:'
-                    f'latest',
-                "test_data": 'data_test.csv:latest'
+                "model_export": f'{config["random_forest_pipeline"]["export_artifact"]}:'
+                f"latest",
+                "test_data": "data_test.csv:latest",
             },
         )
 

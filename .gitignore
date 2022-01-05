@@ -111,3 +111,6 @@ multirun/
 
 #Hydra files
 outputs/
+
+#DVC
+.dvc

@@ -21,7 +21,7 @@ def go(args):
     # destroyed at the end of the context, so we don't leave anything
     # behind and the file gets removed even in case of errors
     logger.info(f"Downloading {args.file_url} ...")
-    with tempfile.NamedTemporaryFile(mode='wb+') as fp:
+    with tempfile.NamedTemporaryFile(mode="wb+") as fp:
 
         logger.info("Creating run")
         with wandb.init(job_type="download_data") as run:
@@ -39,7 +39,7 @@ def go(args):
                 name=args.artifact_name,
                 type=args.artifact_type,
                 description=args.artifact_description,
-                metadata={'original_url': args.file_url}
+                metadata={"original_url": args.file_url},
             )
             artifact.add_file(fp.name, name=basename)
 
@@ -49,7 +49,8 @@ def go(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Download a file and upload it as an artifact to W&B", fromfile_prefix_chars="@"
+        description="Download a file and upload it as an artifact to W&B",
+        fromfile_prefix_chars="@",
     )
 
     parser.add_argument(

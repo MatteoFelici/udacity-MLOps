@@ -100,7 +100,7 @@ def export_model(run, pipe, X_val, val_pred, export_artifact):
             export_path,
             signature=signature,
             input_example=X_val.iloc[:5],
-            serialization_format=mlflow.sklearn.SERIALIZATION_FORMAT_CLOUDPICKLE
+            serialization_format=mlflow.sklearn.SERIALIZATION_FORMAT_CLOUDPICKLE,
         )
 
         # Then upload the temp_dir directory as an artifact:
@@ -109,8 +109,8 @@ def export_model(run, pipe, X_val, val_pred, export_artifact):
         # 3. log the artifact to the run
         artifact = wandb.Artifact(
             export_artifact,
-            type='model_export',
-            description='Random Forest pipeline export'
+            type="model_export",
+            description="Random Forest pipeline export",
         )
         artifact.add_dir(export_path)
         run.log_artifact(artifact)

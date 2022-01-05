@@ -15,5 +15,6 @@ dependencies:
   - scikit-learn
   - seaborn
   - pip:
+    - black
     - wandb
 prefix: /Users/mfelici/anaconda3/envs/udacity-mlops

@@ -114,21 +114,23 @@ def get_inference_pipeline(args):
     )
 
     # Numerical preprocessing pipeline
-    numeric_features = sorted([
-        "danceability",
-        "energy",
-        "loudness",
-        "speechiness",
-        "acousticness",
-        "instrumentalness",
-        "liveness",
-        "valence",
-        "tempo",
-        "duration_ms",
-    ])
+    numeric_features = sorted(
+        [
+            "danceability",
+            "energy",
+            "loudness",
+            "speechiness",
+            "acousticness",
+            "instrumentalness",
+            "liveness",
+            "valence",
+            "tempo",
+            "duration_ms",
+        ]
+    )
 
     numeric_transformer = make_pipeline(
-        SimpleImputer(strategy='median'), StandardScaler()
+        SimpleImputer(strategy="median"), StandardScaler()
     )
 
     # Textual ("nlp") preprocessing pipeline
@@ -138,8 +140,9 @@ def get_inference_pipeline(args):
     reshape_to_1d = FunctionTransformer(np.reshape, kw_args={"newshape": -1})
 
     nlp_transformer = make_pipeline(
-        SimpleImputer(strategy='constant', fill_value=''), reshape_to_1d,
-        TfidfVectorizer(binary=True)
+        SimpleImputer(strategy="constant", fill_value=""),
+        reshape_to_1d,
+        TfidfVectorizer(binary=True),
     )
 
     # Put the 3 tracks together into one pipeline using the ColumnTransformer
@@ -163,10 +166,12 @@ def get_inference_pipeline(args):
     ############# YOUR CODE HERE
     # Append classifier to preprocessing pipeline.
     # Now we have a full prediction pipeline.
-    pipe = Pipeline([
-        ('preprocessor', preprocessor),
-        ('classifier', RandomForestClassifier(**model_config))
-    ])
+    pipe = Pipeline(
+        [
+            ("preprocessor", preprocessor),
+            ("classifier", RandomForestClassifier(**model_config)),
+        ]
+    )
 
     return pipe
 

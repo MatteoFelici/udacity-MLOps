@@ -30,7 +30,7 @@ def go(args):
 
 
 if __name__ == "__main__":
-    
+
     parser = argparse.ArgumentParser(
         description="Use an artifact from W&B", fromfile_prefix_chars="@"
     )
@@ -39,13 +39,13 @@ if __name__ == "__main__":
         "--artifact_name",
         type=str,
         help="Name and version of W&B artifact",
-        required=True
+        required=True,
     )
     parser.add_argument(
         "--artifact_file",
         type=str,
         help="Name and version of W&B artifact",
-        required=True
+        required=True,
     )
 
     args = parser.parse_args()
